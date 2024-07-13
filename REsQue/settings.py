@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-USER_APPS = ["account", "project", "requirement"]
+USER_APPS = ["account", "project", "requirement", "requirement_testing"]
 # Application definition
 
 INSTALLED_APPS = [
