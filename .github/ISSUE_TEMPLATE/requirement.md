@@ -1,0 +1,31 @@
+---
+name: Requirement
+about: 요구사항 작성 템플릿
+title: REQ-
+labels: requirement
+assignees: ZeyaKim
+
+---
+
+# 요구사항
+
+## 앱
+Account
+
+## 세부 기능
+
+## 기능명
+
+## 세부 설명
+
+## 필수 데이터
+
+## 부가 데이터
+
+## 우선순위
+
+## 타입
+
+## 선행 작업
+
+## 테스트
