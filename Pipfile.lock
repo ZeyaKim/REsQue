@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "432a9b87afe213ae8e0b1b0bcd43d9407784e68a17f42eeea19bead2256832f6"
+            "sha256": "de67d2dfcd76f1ceb79be708375c6e30eb3f4a8eb7e44b3a2c2fb9e069fa6419"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -33,6 +33,15 @@
             "index": "pip_conf_index_global",
             "markers": "python_version >= '3.10'",
             "version": "==5.0.7"
+        },
+        "djangorestframework": {
+            "hashes": [
+                "sha256:2b8871b062ba1aefc2de01f773875441a961fefbf79f5eed1e32b2f096944b20",
+                "sha256:36fe88cd2d6c6bec23dca9804bab2ba5517a8bb9d8f47ebc68981b56840107ad"
+            ],
+            "index": "pip_conf_index_global",
+            "markers": "python_version >= '3.8'",
+            "version": "==3.15.2"
         },
         "sqlparse": {
             "hashes": [

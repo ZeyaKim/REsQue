@@ -30,14 +30,21 @@ ALLOWED_HOSTS = []
 USER_APPS = ["account", "project", "requirement", "requirement_testing", "builder"]
 # Application definition
 
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-] + USER_APPS
+THIRD_PARTY_APPS = ["rest_framework"]
+
+INSTALLED_APPS = (
+    [
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+    ]
+    + USER_APPS
+    + THIRD_PARTY_APPS
+)
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
