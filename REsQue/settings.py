@@ -27,7 +27,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-USER_APPS = ["account", "project", "requirement", "requirement_testing", "builder"]
+USER_APPS = [
+    "account",
+    "project",
+    "requirement",
+    "requirement_testing",
+    "builder",
+    "core",
+]
 # Application definition
 
 THIRD_PARTY_APPS = ["rest_framework"]
