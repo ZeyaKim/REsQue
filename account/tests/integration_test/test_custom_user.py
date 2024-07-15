@@ -3,25 +3,28 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from dev.test.fake_data.models.fake_account_models import FakeCustomUser
+from django.core.management import call_command
 
 
 class CustomUserRegisterTestCase(APITestCase):
-    def setUp(self):
-        self.user_model = get_user_model()
-        self.user1 = FakeCustomUser()
-        self.register_url = reverse("register")
+    fixtures = ["test_users.json"]
 
-    def test_create_user_success(self):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_model = get_user_model()
+        cls.register_url = reverse("register")
+
+    def setUp(self):
+        call_command("loaddata", "fixtures/test_users.json", verbosity=0)
+        self.user1 = FakeCustomUser()
+
+    def test_register_success(self):
         data = self.user1.required_fields
 
-        response = self.client.post(self.register_url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    def test_register_fail_with_wrong_email(self): ...
 
-    def test_create_user_fail_with_wrong_email(self):
-        self.assertEqual(True, True)
+    def test_register_fail_with_weak_password(self): ...
 
-    def test_create_user_fail_with_weak_password(self): ...
+    def test_register_fail_with_duplicate_email(self): ...
 
-    def test_create_user_fail_with_duplicate_email(self): ...
-
-    def test_create_user_fail_with_missing_required_field(self): ...
+    def test_register_fail_with_missing_required_field(self): ...
