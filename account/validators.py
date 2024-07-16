@@ -1,7 +1,9 @@
 from django.core.exceptions import ValidationError
 
 
-def validate_email_length(email: str, **kwargs): ...
+def validate_email_length(email: str, **kwargs):
+    if len(email) > 50:
+        raise ValidationError("Ensure this value has at most 50 characters.")
 
 
 class RegisterValidator:

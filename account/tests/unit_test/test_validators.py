@@ -13,8 +13,8 @@ class RegisterValidatorTestCase(SimpleTestCase):
         }
 
         with self.assertRaises(ValidationError) as e:
-            validate_email_length(data)
+            validate_email_length(**data)
 
         self.assertEqual(
-            str(e.exception), "Ensure this value has at most 50 characters."
+            str(e.exception.message), "Ensure this value has at most 50 characters."
         )
