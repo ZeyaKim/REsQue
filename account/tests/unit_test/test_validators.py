@@ -1,10 +1,20 @@
 from django.test import SimpleTestCase
 from django.core.exceptions import ValidationError
+from account.validators import validate_email_length
 
 
-class EmailValidatorTestCase(SimpleTestCase):
-    def setUpTestData(self): ...
+class RegisterValidatorTestCase(SimpleTestCase):
+    def setUp(self): ...
 
-    def test_validate_success_with_valid_emails(self): ...
+    def test_validate_email_length(self):
+        data = {
+            "email": "dsfsdfsdfdsfsdfssfsdfdsfsdfsfsfsdfdsfsdfsfsfsdfdsfsdfsfsfsdfdsfsdfsf@naver.com",
+            "password": "jason1234",
+        }
 
-    def test_validate_fail_with_too_long_emails(self): ...
+        with self.assertRaises(ValidationError) as e:
+            validate_email_length(data)
+
+        self.assertEqual(
+            str(e.exception) == "Ensure this value has at most 50 characters."
+        )
