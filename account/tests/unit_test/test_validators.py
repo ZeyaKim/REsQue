@@ -16,5 +16,5 @@ class RegisterValidatorTestCase(SimpleTestCase):
             validate_email_length(data)
 
         self.assertEqual(
-            str(e.exception) == "Ensure this value has at most 50 characters."
+            str(e.exception), "Ensure this value has at most 50 characters."
         )
