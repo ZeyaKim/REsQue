@@ -1,9 +1,6 @@
 from django.urls import path
-from . import views
-
-app_name = "account"
+from .views import SignUpView
 
 urlpatterns = [
-    # 여기에 URL 패턴을 추가하세요
-    # 예: path('login/', views.login_view, name='login'),
+    path("sign-up/", SignUpView.as_view(), name="sign-up"),
 ]
