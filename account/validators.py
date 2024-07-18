@@ -12,6 +12,11 @@ def validate_password_contains_digit(password: str, **kwargs):
         raise ValidationError("Password must contain at least one digit.")
 
 
+def validate_password_contains_letter(password: str, **kwargs):
+    if not any(ch.isalpha() for ch in password):
+        raise ValidationError("Password must contain at least one letter.")
+
+
 class SignUpValidator:
     validate_funcs = [validate_email_length]
 
