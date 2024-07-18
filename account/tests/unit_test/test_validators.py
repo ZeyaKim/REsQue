@@ -18,9 +18,9 @@ class ValidatorTestCase(SimpleTestCase):
 
         # Act & Assert
         try:
-            validators.RegisterValidator.validate(data)
+            validators.SignUpValidator.validate(data)
         except ValidationError:
-            self.fail("RegisterValidator raised ValidationError unexpectedly.")
+            self.fail("SignUpValidator raised ValidationError unexpectedly.")
 
     def test_raise_validation_error_when_email_is_too_long(self):
         # Arrange

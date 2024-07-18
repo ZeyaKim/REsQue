@@ -6,7 +6,7 @@ def validate_email_length(email: str, **kwargs):
         raise ValidationError("Ensure this value has at most 50 characters.")
 
 
-class RegisterValidator:
+class SignUpValidator:
     validate_funcs = [validate_email_length]
 
     @classmethod
