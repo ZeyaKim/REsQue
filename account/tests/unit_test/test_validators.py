@@ -8,9 +8,9 @@ fake = Faker()
 
 class ValidatorTestCase(SimpleTestCase):
     @classmethod
-    def setUpTestData(cls):
-        cls.valid_email = fake.email()
-        cls.valid_password = fake.password()
+    def setUp(self):
+        self.valid_email = fake.email()
+        self.valid_password = fake.password()
 
     def test_pass_validation(self):
         # Arrange
