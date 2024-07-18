@@ -18,7 +18,7 @@ def validate_password_contains_letter(password: str, **kwargs):
 
 def validate_password_length(password: str, **kwargs):
     if len(password) < 8:
-        raise ValidationError("Password must be at least 8 characters long.")
+        raise ValidationError("Password must contain at least 8 characters.")
 
 
 class SignUpValidator:
