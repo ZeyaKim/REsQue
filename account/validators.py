@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-import re
 
 
 def validate_email_length(email: str, **kwargs):
@@ -15,6 +14,11 @@ def validate_password_contains_digit(password: str, **kwargs):
 def validate_password_contains_letter(password: str, **kwargs):
     if not any(ch.isalpha() for ch in password):
         raise ValidationError("Password must contain at least one letter.")
+
+
+def validate_password_length(password: str, **kwargs):
+    if len(password) < 8:
+        raise ValidationError("Password must be at least 8 characters long.")
 
 
 class SignUpValidator:
