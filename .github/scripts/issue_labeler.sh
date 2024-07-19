@@ -40,7 +40,7 @@ fi
 if [[ $LABEL == "requirement" ]]; then
     # 유효하지 않은 문자 제거 및 소문자 변환
     CLEANED_TITLE=$(echo "${ISSUE_TITLE:4}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//')
-    NEW_BRANCH_NAME="feature/${ISSUE_NUMBER}-${CLEANED_TITLE}"
+    NEW_BRANCH_NAME="feature/#${ISSUE_NUMBER}-${CLEANED_TITLE}"
 
     # develop 브랜치의 최신 SHA를 가져옵니다.
     DEVELOP_SHA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
