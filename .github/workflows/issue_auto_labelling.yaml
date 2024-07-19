@@ -1,0 +1,22 @@
+name: Issue Labeler and Branch Creator
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  label-and-branch:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run API script
+      run: |
+        chmod +x .github/scripts/issue_labeler.sh
+        .github/scripts/issue_labeler.sh ${{ github.event.issue.number }} "${{ github.event.issue.title }}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
