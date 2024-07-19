@@ -13,12 +13,20 @@ class Command(BaseCommand):
             default=".",
             help="Specify the type of tests to run (unit/integration/all)",
         )
-        # 추가 인자를 전달하기 위한 옵션
-        parser.add_argument("test_labels", nargs="*")
+
+    def run_from_argv(self, argv):
+        """
+        Override the run_from_argv to use parse_known_args()
+        """
+        parser = self.create_parser(argv[0], argv[1])
+        options, unknown = parser.parse_known_args(argv[2:])
+        cmd_options = vars(options)
+        args = cmd_options.pop("args", ())
+        handle_args = (args,) + tuple(unknown)
+        self.execute(*handle_args, **cmd_options)
 
     def handle(self, *args, **options):
-        test_type = options["type"]
-        test_labels = options["test_labels"]
+        test_type = options.pop("type")
 
         if test_type == "unit":
             settings.TEST_RUNNER = "core.utils.test_runners.UnitTestRunner"
@@ -28,4 +36,5 @@ class Command(BaseCommand):
             settings.TEST_RUNNER = "django.test.runner.DiscoverRunner"
 
         # Django의 기본 test 명령어 호출
-        call_command("test", *test_labels)
+        # 알려지지 않은 인자들을 포함한 모든 추가 인자를 그대로 전달합니다.
+        call_command("test", *args)
