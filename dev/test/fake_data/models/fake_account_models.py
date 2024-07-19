@@ -7,6 +7,5 @@ class FakeCustomUser(FakeModel):
     def __init__(self):
         super().__init__(CustomUser)
 
-    @property
-    def required_fields(self):
+    def set_required_fields(self):
         return {"email": self._faker.email(), "password": self._faker.password()}
