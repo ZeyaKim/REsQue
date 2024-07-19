@@ -27,17 +27,40 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-USER_APPS = ["account", "project", "requirement", "requirement_testing", "builder"]
+USER_APPS = [
+    "account",
+    "project",
+    "requirement",
+    "requirement_testing",
+    "builder",
+    "core",
+]
 # Application definition
 
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-] + USER_APPS
+THIRD_PARTY_APPS = ["rest_framework"]
+
+INSTALLED_APPS = (
+    [
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+    ]
+    + USER_APPS
+    + THIRD_PARTY_APPS
+)
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -83,6 +106,8 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+
+AUTH_USER_MODEL = "account.CustomUser"
 
 AUTH_PASSWORD_VALIDATORS = [
     {

@@ -5,9 +5,12 @@ name = "pip_conf_index_global"
 
 [packages]
 django = "*"
+djangorestframework = "*"
+coverage = "*"
 
 [dev-packages]
 isort = "*"
+faker = "*"
 
 [requires]
 python_version = "3.12"
