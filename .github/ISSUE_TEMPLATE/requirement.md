@@ -1,7 +1,7 @@
 ---
 name: Requirement
 about: 요구사항 작성 템플릿
-title: REQ-
+title: 'REQ: '
 labels: requirement
 assignees: ZeyaKim
 

@@ -1,7 +1,7 @@
 ---
 name: Test
 about: 테스트 작성 템플릿
-title: TEST-
+title: 'TEST: '
 labels: test
 assignees: ZeyaKim
 
