@@ -1,9 +1,5 @@
----
-이슈: "#id"
-브랜치명: "issue_type/branch-name"
-도메인: "domain"
-기능: "feature_name"
----
+## Metadata
+<!-- automated -->
 
 ## 요구사항 설명
 <!-- 구현하려는 요구사항에 대해 간단히 설명해주세요 -->
@@ -19,8 +15,6 @@
 
 ## 테스트케이스
 <!-- automated -->
-- TC_name
-  - TC_funcs
 
 ## 스크린샷 (선택사항)
 <!-- 스크린샷이 필요한 경우 첨부해주세요 -->
