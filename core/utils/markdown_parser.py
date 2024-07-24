@@ -20,14 +20,38 @@ class Markdown:
 
     @classmethod
     def parse(cls, markdown_content: str):
-        """마크다운 문자열을 파싱하여 Markdown 객체로 변환"""
+        """마크다운 문자열을 파싱하여 Markdown 객체로 변환 
+
+        Args:
+            markdown_content (str): 마크다운 문자열
+
+        Returns:
+            Markdown: 파싱된 마크다운 객체
+
+        Raises:
+            MarkdownParseError: 마크다운 파싱 중 오류 발생 시
+        """
         try:
             return cls._parse_section(markdown_content)
-        except Exception as e:
-            raise MarkdownParseError(f"마크다운 파싱 중 오류 발생: {str(e)}")
+        except MarkdownParseError as e:
+            raise e
 
     @classmethod
     def _parse_section(cls, section_content: str, level: int = 1):
+        """마크다운 문자열을 파싱하여 메인 섹션과 하위 섹션으로 분할
+
+        `#{level} `로 시작하는 섹션을 파싱한 후, `{level+1}`을 기준으로 메인 섹션과 하위 섹션으로 분할한다.
+        그 후, 메인 섹션과 하위 섹션을 각각 파싱하여 메인 섹션에서는 제목, 댓글, 본문을 추출하고,
+        하위 섹션은 Markdown 객체의 리스트로 변환한 후 마크다운 객체의 생성자에 전달한다.
+
+        Args:
+            section_content (str): 파싱할 마크다운 문자열
+            level (int): 현재 섹션의 레벨
+
+        Returns:
+            Markdown: 파싱된 마크다운 객체
+
+        """
         main_section_pattern = re.compile(
             rf"^(#{{{level}}}[^\n]*(?:\n(?!#{{1,{level}}})[^\n]*)*)",
             re.MULTILINE | re.DOTALL,
@@ -42,23 +66,36 @@ class Markdown:
         main_content = match.group(1).strip()
         sub_sections_content = section_content[match.end() :].strip()
 
+        sub_section_objects = [
+            cls._parse_section(sub_section_content, level + 1)
+            for sub_section_content in cls._split_sub_content(
+                sub_sections_content, level + 1
+            )
+        ]
+
         if main_content:
             return cls(
                 **cls._parse_main_content(main_content, level),
                 level=level,
-                sub_sections=[
-                    cls._parse_section(sub_section_content, level + 1)
-                    for sub_section_content in cls._split_sub_content(
-                        sub_sections_content, level + 1
-                    )
-                ],
+                sub_sections=sub_section_objects,
             )
 
-        return main_content, sub_sections_content
+        return sub_section_objects
 
     @staticmethod
     def _parse_main_content(main_content: str, level: int = 1):
-        """주 내용을 제목, 댓글, 본문으로 파싱"""
+        """주 내용을 제목, 댓글, 본문으로 파싱
+
+        주 내용은 제목, 댓글, 본문으로 구성되어 있으며, 제목은 `#{level} `로 시작한다.
+        댓글은 HTML 주석으로 감싸져 있으며, 본문은 제목과 댓글 사이의 내용이다.
+
+        Args:
+            main_content (str): 주 내용
+            level (int): 현재 섹션의 레벨
+
+        Returns:
+            dict: 파싱된 주 내용의 제목, 댓글, 본문
+        """
         main_content_pattern = re.compile(
             rf"^(?P<title>#{{{level}}}\s.*?)\n(?:(?P<comment><!--.*?-->\n))?\n*(?P<body>(?:(?!^#{{1,{level}}}\s).*\n?)*)",
             re.MULTILINE | re.DOTALL,
@@ -88,13 +125,21 @@ class Markdown:
 
     @staticmethod
     def _split_sub_content(sub_contents: str, level: int) -> list[str]:
-        """하위 내용을 개별 섹션으로 분할"""
-        # level에 따라 '#{level} '로 시작하여 다음 '#{level} ' 전까지의 내용을 캡처하는 패턴
+        """하위 내용을 개별 섹션으로 분할
+
+        하위 내용은 `#{level+1} `로 시작하는 섹션으로 구성되어 있으며,
+        `#{level} `로 시작하는 섹션을 기준으로 분할한다.
+
+        Args:
+            sub_contents (str): 하위 내용
+            level (int): 현재 섹션의 레벨
+
+        Returns:
+            list[str]: 분할된 하위 내용
+        """
         split_pattern = re.compile(
             rf"(#{{{level}}} .*?(?=\n#{{{level}}} |\Z))", re.MULTILINE | re.DOTALL
         )
-
-        # findall을 사용하여 모든 매치를 찾음
         splitted_sub_contents = split_pattern.findall(sub_contents)
 
         return splitted_sub_contents
@@ -121,12 +166,26 @@ class Markdown:
 
     @__getitem__.register
     def _(self, title: str):
-        """제목으로 하위 섹션 접근"""
+        """제목으로 하위 섹션 접근
+
+        Args:
+            title (str): 하위 섹션의 제목
+
+        Returns:
+            Markdown: 하위 섹션 객체
+        """
         return self.sub_sections.get(title)
 
     @__getitem__.register
-    def _(self, path: list):
-        """경로로 중첩된 하위 섹션 접근"""
+    def _(self, path: list[str]):
+        """경로로 중첩된 하위 섹션 접근
+
+        Args:
+            path (list[str]): 하위 섹션의 제목 경로
+
+        Returns:
+            Markdown: 하위 섹션 객체
+        """
         current_title = path[0]
         remaining_path = path[1:]
 
@@ -136,7 +195,7 @@ class Markdown:
         next_section = self.sub_sections.get(current_title)
         return next_section[remaining_path] if next_section else None
 
-    def build(self) -> str:
+    def __str__(self) -> str:
         """Markdown 객체를 문자열로 변환"""
         main_content = (
             f"{'#'*self.level} {self.title}\n<!-- {self.comment} -->\n\n{self.body}\n"
@@ -144,44 +203,3 @@ class Markdown:
         sub_content = "\n".join([s.build() for s in self.sub_sections.values()])
 
         return f"{main_content}\n{sub_content}"
-
-
-markdown_for_test = """# Title
-<!-- Comment -->
-
-Body
-
-## Subtitle 1
-<!-- Comment -->
-
-Body
-
-### Sub-subtitle 1
-<!-- Comment -->
-
-Body
-
-### Sub-subtitle 2
-<!-- Comment -->
-
-Body
-
-## Subtitle 2
-<!-- Comment -->
-
-Body
-
-### Sub-subtitle 1
-<!-- Comment -->
-
-Body
-
-### Sub-subtitle 2
-<!-- Comment -->
-
-Body
-"""
-
-
-print(Markdown.parse(markdown_for_test).build())
-print(Markdown.parse(markdown_for_test)["Subtitle 1"].build())
