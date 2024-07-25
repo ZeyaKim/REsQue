@@ -1,121 +1,99 @@
 import re
-from functools import singledispatchmethod
 
 
-class MarkdownParseError(Exception):
-    """마크다운 파싱 중 발생하는 오류를 위한 사용자 정의 예외"""
-
-    pass
-
-
-class Markdown:
-    """마크다운 문서를 파싱하고 조작하는 클래스
-
-    이 마크다운은 다음과 같은 구조를 가집니다:
-    1. h1로 시작하는 계층 구조이거나, h2의 집합으로 이루어진 구조
-    2. heading 바로 아래에는 comment가 위치
-    3. 다음 sub_heading이 나오기 전까지의 내용을 main_content로 간주
-    4. sub_heading이 나온 이후의 텍스트는 sub_headings로 분리
-    """
-
+class MarkdownParser:
     @classmethod
-    def parse(cls, markdown_content: str):
-        """마크다운 문자열을 파싱하여 Markdown 객체로 변환 
-
-        Args:
-            markdown_content (str): 마크다운 문자열
-
-        Returns:
-            Markdown: 파싱된 마크다운 객체
-
-        Raises:
-            MarkdownParseError: 마크다운 파싱 중 오류 발생 시
-        """
+    def parse(cls, markdown_content: str) -> "Markdown":
         try:
-            return cls._parse_section(markdown_content)
+            parsed_markdown = cls._parse_section(markdown_content)
+            if isinstance(parsed_markdown, dict):
+                return MultiHeadingMarkdown(parsed_markdown)
+            return SingleHeadingMarkdown(parsed_markdown)
+
         except MarkdownParseError as e:
             raise e
 
-    @classmethod
-    def _parse_section(cls, section_content: str, level: int = 1):
-        """마크다운 문자열을 파싱하여 메인 섹션과 하위 섹션으로 분할
-
-        `#{level} `로 시작하는 섹션을 파싱한 후, `{level+1}`을 기준으로 메인 섹션과 하위 섹션으로 분할한다.
-        그 후, 메인 섹션과 하위 섹션을 각각 파싱하여 메인 섹션에서는 제목, 댓글, 본문을 추출하고,
-        하위 섹션은 Markdown 객체의 리스트로 변환한 후 마크다운 객체의 생성자에 전달한다.
-
-        Args:
-            section_content (str): 파싱할 마크다운 문자열
-            level (int): 현재 섹션의 레벨
-
-        Returns:
-            Markdown: 파싱된 마크다운 객체
-
-        """
-        main_section_pattern = re.compile(
-            rf"^(#{{{level}}}[^\n]*(?:\n(?!#{{1,{level}}})[^\n]*)*)",
-            re.MULTILINE | re.DOTALL,
+    @staticmethod
+    def _parse_section(section_content: str, level: int = 1):
+        main_content, sub_sections_string = (
+            MarkdownParser._divide_markdown_before_next_section(section_content, level)
         )
 
-        match = main_section_pattern.match(section_content)
-        if not match:
-            raise MarkdownParseError(
-                f"올바른 마크다운 구조를 찾을 수 없습니다. (레벨: {level})"
+        main_section = None
+        if main_content:
+            main_section = MarkdownSection(
+                **MarkdownParser._parse_main_content(main_content, level), level=level
             )
 
-        main_content = match.group(1).strip()
-        sub_sections_content = section_content[match.end() :].strip()
+        if not sub_sections_string:
+            return main_section
 
-        sub_section_objects = [
-            cls._parse_section(sub_section_content, level + 1)
-            for sub_section_content in cls._split_sub_content(
-                sub_sections_content, level + 1
-            )
+        splitted_sub_sections = MarkdownParser._split_sub_content(
+            sub_sections_string, level + 1
+        )
+
+        sub_sections = [
+            MarkdownParser._parse_section(sub_section_content, level + 1)
+            for sub_section_content in splitted_sub_sections
         ]
 
-        if main_content:
-            return cls(
-                **cls._parse_main_content(main_content, level),
-                level=level,
-                sub_sections=sub_section_objects,
-            )
+        if main_section:
+            main_section.insert_sub_sections(sub_sections)
+            return main_section
 
-        return sub_section_objects
+        return {sub_section.title: sub_section for sub_section in sub_sections}
+
+    @staticmethod
+    def _divide_markdown_before_next_section(markdown_content: str, level=1):
+        """
+        마크다운 문자열을 현재 레벨의 섹션과 다음 레벨의 섹션으로 나눕니다.
+        둘 중 하나가 없을 수 있습니다.
+        """
+        pattern = rf"^#{{{level+1}}}\s"  # 예: 레벨이 1일 때 "## "를 찾음
+
+        match = re.search(pattern, markdown_content, re.MULTILINE)
+
+        if not match:
+            pattern = rf"^#{{{level}}}\s"  # 예: 레벨이 1일 때 "# "를 찾음
+
+            match = re.search(pattern, markdown_content, re.MULTILINE)
+
+            if not match:
+                raise MarkdownParseError(
+                    f"주 섹션 또는 서브 섹션을 찾을 수 없습니다. (레벨: {level})\n{markdown_content}"
+                )
+
+            return markdown_content, ""
+
+        split_point = match.start()
+        main_section = markdown_content[:split_point].strip()
+        sub_sections = markdown_content[split_point:].strip()
+
+        return main_section, sub_sections
 
     @staticmethod
     def _parse_main_content(main_content: str, level: int = 1):
-        """주 내용을 제목, 댓글, 본문으로 파싱
-
-        주 내용은 제목, 댓글, 본문으로 구성되어 있으며, 제목은 `#{level} `로 시작한다.
-        댓글은 HTML 주석으로 감싸져 있으며, 본문은 제목과 댓글 사이의 내용이다.
-
-        Args:
-            main_content (str): 주 내용
-            level (int): 현재 섹션의 레벨
-
-        Returns:
-            dict: 파싱된 주 내용의 제목, 댓글, 본문
-        """
         main_content_pattern = re.compile(
-            rf"^(?P<title>#{{{level}}}\s.*?)\n(?:(?P<comment><!--.*?-->\n))?\n*(?P<body>(?:(?!^#{{1,{level}}}\s).*\n?)*)",
-            re.MULTILINE | re.DOTALL,
+            rf"^(?P<title>#{{{level}}}\s[^\n]+)(?:\n(?P<comment><!--.*?-->))?(?P<body>(?:\n\n[\s\S]*)?)",
+            re.MULTILINE,
         )
 
-        match = main_content_pattern.match(main_content)
+        match = main_content_pattern.match(main_content.strip())
         if not match:
             raise MarkdownParseError(
                 f"주 섹션의 구조가 올바르지 않습니다. (레벨: {level})"
             )
 
-        title = re.sub(rf"^#{{{level}}}\s+", "", match.group("title").strip())
-
-        comment_match = match.group("comment")
-        if comment_match:
-            comment = re.sub(r"<!--\s*(.*?)\s*-->", r"\1", comment_match).strip()
-        else:
-            comment = ""
-
+        title = match.group("title").strip()
+        comment = match.group("comment")
         body = match.group("body").strip()
+
+        title = title.replace(f"{'#'*level} ", "")
+        comment = (
+            comment.replace("<!-- ", "").replace(" -->", "").strip()
+            if comment
+            else None
+        )
 
         return {
             "title": title,
@@ -125,81 +103,89 @@ class Markdown:
 
     @staticmethod
     def _split_sub_content(sub_contents: str, level: int) -> list[str]:
-        """하위 내용을 개별 섹션으로 분할
-
-        하위 내용은 `#{level+1} `로 시작하는 섹션으로 구성되어 있으며,
-        `#{level} `로 시작하는 섹션을 기준으로 분할한다.
-
-        Args:
-            sub_contents (str): 하위 내용
-            level (int): 현재 섹션의 레벨
-
-        Returns:
-            list[str]: 분할된 하위 내용
         """
-        split_pattern = re.compile(
-            rf"(#{{{level}}} .*?(?=\n#{{{level}}} |\Z))", re.MULTILINE | re.DOTALL
-        )
-        splitted_sub_contents = split_pattern.findall(sub_contents)
+        서브 섹션을 분할합니다.
+        """
+        pattern = rf"^#{{{level}}} "
+        matches = list(re.finditer(pattern, sub_contents, re.MULTILINE))
 
-        return splitted_sub_contents
+        if not matches:
+            return [sub_contents] if sub_contents.strip() else []
 
+        result = []
+        for i, match in enumerate(matches):
+            start = match.start()
+            end = matches[i + 1].start() if i + 1 < len(matches) else None
+            result.append(sub_contents[start:end].strip())
+
+        return result
+
+
+class MarkdownParseError(Exception):
+    """마크다운 파싱 중 발생하는 오류를 위한 사용자 정의 예외"""
+
+    pass
+
+
+class Markdown:
+    def __init__(self, parsed_markdown):
+        self.parsed_markdown = parsed_markdown
+
+    def __str__(self) -> str:
+        raise NotImplementedError("Not implemented")
+
+
+class SingleHeadingMarkdown(Markdown):
+    def __init__(self, parsed_markdown):
+        self.parsed_markdown: MarkdownSection = parsed_markdown
+
+    def __str__(self) -> str:
+        return str(self.parsed_markdown)
+
+    def __getitem__(self, heading: str):
+        if heading != self.parsed_markdown.title:
+            return None
+        return self.parsed_markdown
+
+
+class MultiHeadingMarkdown(Markdown):
+    def __str__(self) -> str:
+        return "\n\n".join(str(s) for s in self.parsed_markdown.values())
+
+    def __getitem__(self, title: str):
+        return self.parsed_markdown[title]
+
+
+class MarkdownSection:
     def __init__(
         self,
         title: str,
         comment: str,
         body: str,
-        level: int = 1,
-        sub_sections: list["Markdown"] = None,
+        level: int,
     ):
-        """Markdown 객체 초기화"""
-        self.level = level
         self.title = title
         self.comment = comment
         self.body = body
-        self.sub_sections = {s.title: s for s in sub_sections} if sub_sections else {}
+        self.level = level
 
-    @singledispatchmethod
-    def __getitem__(self, arg):
-        """지원되지 않는 인자 타입에 대한 기본 처리"""
-        raise NotImplementedError("Unsupported argument type")
+        self.sub_sections = None
 
-    @__getitem__.register
-    def _(self, title: str):
-        """제목으로 하위 섹션 접근
+    def __getitem__(self, title: str):
+        if not self.sub_sections:
+            return None
 
-        Args:
-            title (str): 하위 섹션의 제목
-
-        Returns:
-            Markdown: 하위 섹션 객체
-        """
-        return self.sub_sections.get(title)
-
-    @__getitem__.register
-    def _(self, path: list[str]):
-        """경로로 중첩된 하위 섹션 접근
-
-        Args:
-            path (list[str]): 하위 섹션의 제목 경로
-
-        Returns:
-            Markdown: 하위 섹션 객체
-        """
-        current_title = path[0]
-        remaining_path = path[1:]
-
-        if not remaining_path:
-            return self.sub_sections.get(current_title)
-
-        next_section = self.sub_sections.get(current_title)
-        return next_section[remaining_path] if next_section else None
+        return self.sub_sections[title]
 
     def __str__(self) -> str:
-        """Markdown 객체를 문자열로 변환"""
         main_content = (
-            f"{'#'*self.level} {self.title}\n<!-- {self.comment} -->\n\n{self.body}\n"
+            f"{'#' * self.level} {self.title}\n<!-- {self.comment} -->\n\n{self.body}"
         )
-        sub_content = "\n".join([s.build() for s in self.sub_sections.values()])
+        sub_content = "\n\n".join(str(s) for s in self.sub_sections.values())
+        return f"{main_content}\n\n{sub_content}".strip()
 
-        return f"{main_content}\n{sub_content}"
+    def insert_sub_sections(self, sub_sections):
+        if not self.sub_sections:
+            self.sub_sections = {}
+
+        self.sub_sections.update({s.title: s for s in sub_sections})
