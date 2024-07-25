@@ -11,6 +11,7 @@ coverage = "*"
 [dev-packages]
 isort = "*"
 faker = "*"
+requests = "*"
 
 [requires]
 python_version = "3.12"
