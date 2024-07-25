@@ -2,7 +2,7 @@
 name: Requirement
 about: Requirement Issue Template
 title: 'REQ: '
-labels: requirement
+labels: failed_test, requirement
 assignees: ZeyaKim
 
 ---
