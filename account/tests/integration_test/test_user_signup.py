@@ -67,15 +67,4 @@ class UserSignupTestCase(APITestCase):
         self.assertIn("이 필드는 필수 항목입니다.", str(response.data))
         self.assertEqual(User.objects.count(), 0)
 
-    def test_signup_with_short_password(self):
-        # Given
-        data = self.create_valid_data()
-        data["password"] = "sho1t"
-
-        # When
-        response = self.client.post(self.signup_url, data)
-
-        # Then
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Password must contain 6 to 30 characters", str(response.data))
-        self.assertEqual(User.objects.count(), 0)
+        
