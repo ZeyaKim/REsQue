@@ -17,12 +17,17 @@ def validate_password_contains_letter(password: str, **kwargs):
 
 
 def validate_password_length(password: str, **kwargs):
-    if len(password) < 8:
-        raise ValidationError("Password must contain at least 8 characters.")
+    if not 6 < len(password) < 30:
+        raise ValidationError("Password must contain 6 to 30 characters.")
 
 
 class SignUpValidator:
-    validate_funcs = [validate_email_length]
+    validate_funcs = [
+        validate_email_length,
+        validate_password_contains_digit,
+        validate_password_contains_letter,
+        validate_password_length,
+    ]
 
     @classmethod
     def validate(cls, kwargs):
