@@ -108,6 +108,7 @@ class PRTestRunner(DiscoverRunner):
 
 
 def main():
+    print("Running tests for issue related tests")
     if not settings.configured:
         django.setup()
 

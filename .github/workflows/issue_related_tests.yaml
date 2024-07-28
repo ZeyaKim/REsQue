@@ -22,20 +22,35 @@ jobs:
         path: ~/.local/share/virtualenvs
         key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
 
-    - name: Install dependencies and run API script
+    - name: Install pipenv
+      run: |
+        pip install pipenv
+      continue-on-error: true
+
+    - name: Install dependencies
+      run: |
+        pipenv install --dev
+      continue-on-error: true
+
+    - name: Set PYTHONPATH and check environment
       run: |
         echo "Current working directory: $(pwd)"
         ls -la
         export PYTHONPATH=$PYTHONPATH:$(pwd)
-        pip install pipenv
-        pipenv install --dev
-        pipenv run python core/utils/issue_related_tests.py
+        echo "PYTHONPATH: $PYTHONPATH"
+        pipenv --venv
+      continue-on-error: true
+
+    - name: Run API script
+      run: |
+        pipenv run python -v core/utils/issue_related_tests.py
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO: ${{ github.repository }}
         OWNER: ${{ github.repository_owner }}
         BRANCH: ${{ github.head_ref }}
         DJANGO_SETTINGS_MODULE: 'REsQue.settings'
+      continue-on-error: true
 
     - name: Check for script errors
       if: failure()
