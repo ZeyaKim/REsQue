@@ -123,7 +123,7 @@ def main():
 
         # Django 설정에서 TEST_RUNNER 설정을 임시로 변경
         original_test_runner = settings.TEST_RUNNER
-        settings.TEST_RUNNER = "path.to.your.PRTestRunner"
+        settings.TEST_RUNNER = "core.utils.issue_related_tests.PRTestRunner"
 
         # call_command를 사용하여 테스트 실행
         try:
@@ -131,9 +131,10 @@ def main():
                 "test",
                 verbosity=2,
                 interactive=False,
-                testrunner="path.to.your.PRTestRunner",
+                testrunner=settings.TEST_RUNNER,
                 testcase_names=testcase_names,
             )
+            print("Tests completed successfully")
         finally:
             # 원래의 TEST_RUNNER 설정 복구
             settings.TEST_RUNNER = original_test_runner
