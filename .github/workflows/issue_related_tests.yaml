@@ -26,3 +26,4 @@ jobs:
         REPO: ${{ github.repository }}
         OWNER: ${{ github.repository_owner }}
         BRANCH: ${{ github.head_ref }}
+        DJANGO_SETTINGS_MODULE: 'REsQue.settings' 
