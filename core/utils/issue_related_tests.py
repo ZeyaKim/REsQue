@@ -43,7 +43,7 @@ def get_test_issue_names(issue_number):
     TEST: #{issue_number}-{testcase_name}
     """
 
-    url = f"https://api.github.com/repos/{owner}/{repo}/issues?labels=test"
+    url = f"https://api.github.com/repos/{repo}/issues?labels=test"
     headers = {
         "Authorization": f"token {github_token}",
         "Accept": "application/vnd.github.v3+json",
@@ -89,6 +89,11 @@ class PRTestRunner(DiscoverRunner):
             if isinstance(test, TestCase) or issubclass(test, TestCase):
                 if test.__class__.__name__ in self.testcase_names:
                     filtered_tests.append(test)
+
+        if not filtered_tests:
+            sys.exit("No tests found for this issue")
+        else:
+            print(f"Running tests for: {', '.join(self.testcase_names)}")
 
         new_suite = suite.__class__()
         new_suite.addTests(filtered_tests)
