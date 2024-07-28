@@ -16,8 +16,17 @@ jobs:
       with:
         python-version: '3.12.3'
 
+    - name: Cache pipenv virtualenv
+      uses: actions/cache@v2
+      with:
+        path: ~/.local/share/virtualenvs
+        key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+
     - name: Install dependencies and run API script
       run: |
+        echo "Current working directory: $(pwd)"
+        ls -la
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
         pip install pipenv
         pipenv install --dev
         pipenv run python core/utils/issue_related_tests.py
@@ -26,4 +35,10 @@ jobs:
         REPO: ${{ github.repository }}
         OWNER: ${{ github.repository_owner }}
         BRANCH: ${{ github.head_ref }}
-        DJANGO_SETTINGS_MODULE: 'REsQue.settings' 
+        DJANGO_SETTINGS_MODULE: 'REsQue.settings'
+
+    - name: Check for script errors
+      if: failure()
+      run: |
+        echo "The script failed to run. Please check the logs for more information."
+        exit 1
