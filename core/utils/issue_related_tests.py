@@ -7,7 +7,7 @@ from django.test import TestCase
 import django
 from django.conf import settings
 from django.core.management import call_command
-
+from unittest import TestSuite
 
 owner = os.getenv("OWNER")
 repo = os.getenv("REPO")
@@ -104,14 +104,20 @@ class PRTestRunner(DiscoverRunner):
         """
         filtered_tests = []
         for test in suite:
-            if isinstance(test, TestCase) or issubclass(test, TestCase):
+            if isinstance(test, TestCase):
                 if test.__class__.__name__ in self.testcase_names:
                     filtered_tests.append(test)
+            elif isinstance(test, TestSuite):
+                # 중첩된 TestSuite를 재귀적으로 처리
+                filtered_suite = self.filter_suite(test)
+                if filtered_suite.countTestCases() > 0:
+                    filtered_tests.extend(filtered_suite)
 
         if not filtered_tests:
-            sys.exit("No tests found for this issue")
-        else:
-            print(f"Running tests for: {', '.join(self.testcase_names)}")
+            print("No tests found for this issue")
+            return suite.__class__()  # 빈 테스트 스위트 반환
+
+        print(f"Running tests for: {', '.join(self.testcase_names)}")
 
         new_suite = suite.__class__()
         new_suite.addTests(filtered_tests)
