@@ -118,8 +118,8 @@ def main():
         test_runner = PRTestRunner(
             testcase_names=testcase_names, verbosity=2, interactive=False
         )
-        failures = (
-            test_runner.run_tests()
+        failures = test_runner.run_tests(
+            []
         )  # 여기서 "account"는 테스트를 실행할 앱 이름입니다. 필요에 따라 변경하세요.
 
         if failures:
