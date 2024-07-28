@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.db import connection
+from REsQue.settings import USER_APPS
 
 
 class Command(BaseCommand):
@@ -8,7 +9,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write("Resetting migrations...")
-        call_command("migrate", "--zero")
+        for app in USER_APPS:
+            call_command("migrate", app, "zero")
 
         self.stdout.write("Dropping all tables...")
         with connection.cursor() as cursor:

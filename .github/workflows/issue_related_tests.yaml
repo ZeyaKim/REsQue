@@ -1,0 +1,60 @@
+name: Issue Related Tests
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  issue-related-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12.3'
+
+    - name: Install pipenv and generate requirements.txt
+      run: |
+        pip install pipenv
+        pipenv requirements > requirements.txt
+        cat requirements.txt
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Set PYTHONPATH
+      run: |
+        echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+
+    - name: Make migrations
+      run: |
+        python manage.py makemigrations
+
+    - name: Run migrations
+      run: |
+        python manage.py migrate
+
+    - name: Run API script
+      run: |
+        export DJANGO_SETTINGS_MODULE=REsQue.settings
+        python -c "import sys; print(sys.path)"
+        python core/utils/issue_related_tests.py
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPO: ${{ github.repository }}
+        OWNER: ${{ github.repository_owner }}
+        BRANCH: ${{ github.head_ref }}
+        PYTHONUNBUFFERED: "1"
+
+    - name: Check for script errors
+      if: failure()
+      run: |
+        echo "The script failed to run. Please check the logs for more information."
+        cat core/utils/issue_related_tests.py
+        echo "Current environment variables:"
+        env
+        exit 1
