@@ -2,24 +2,6 @@ from django.test import SimpleTestCase, TestCase
 from rest_framework import serializers
 from account.serializers import UserSignUpSerializer
 
-import os
-import sys
-import django
-
-print(f"Current working directory: {os.getcwd()}")
-print(f"PYTHONPATH: {sys.path}")
-print(f"DJANGO_SETTINGS_MODULE: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
-
-try:
-    from django.conf import settings
-
-    print(f"Django settings module: {settings.SETTINGS_MODULE}")
-except ImportError as e:
-    print(f"Failed to import Django settings: {e}")
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "REsQue.settings")
-django.setup()
-
 
 class UserSignUpValidationTestCase(TestCase):
     def setUp(self):

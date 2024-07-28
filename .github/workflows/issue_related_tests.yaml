@@ -16,21 +16,15 @@ jobs:
       with:
         python-version: '3.12.3'
 
-    - name: Cache pipenv virtualenv
-      uses: actions/cache@v2
-      with:
-        path: ~/.local/share/virtualenvs
-        key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
-
-    - name: Install pipenv
+    - name: Install pipenv and generate requirements.txt
       run: |
         pip install pipenv
-      continue-on-error: true
+        pipenv lock -r > requirements.txt
+        cat requirements.txt
 
     - name: Install dependencies
       run: |
-        pipenv install --dev
-      continue-on-error: true
+        pip install -r requirements.txt
 
     - name: Set PYTHONPATH and check environment
       run: |
@@ -38,22 +32,23 @@ jobs:
         ls -la
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         echo "PYTHONPATH: $PYTHONPATH"
-        pipenv --venv
-      continue-on-error: true
+        which python
+        python --version
 
     - name: Run API script
       run: |
-        pipenv run python core/utils/issue_related_tests.py
+        python core/utils/issue_related_tests.py
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO: ${{ github.repository }}
         OWNER: ${{ github.repository_owner }}
         BRANCH: ${{ github.head_ref }}
         DJANGO_SETTINGS_MODULE: 'REsQue.settings'
-      continue-on-error: true
+        PYTHONUNBUFFERED: "1"
 
     - name: Check for script errors
       if: failure()
       run: |
         echo "The script failed to run. Please check the logs for more information."
+        cat core/utils/issue_related_tests.py
         exit 1
