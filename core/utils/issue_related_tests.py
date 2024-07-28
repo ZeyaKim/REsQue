@@ -25,57 +25,33 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 sys.path.insert(0, project_root)
 print(f"Updated sys.path: {sys.path}")
 
-
 def get_issue_number_from_branch():
-    """
-    브런치 이름에서 이슈 번호를 추출합니다.
-
-    브런치 이름은 다음과 같은 형식이어야 합니다.
-    {issue_type}/{issue_number}-{issue_title}
-    """
     issue_pattern = r"(\w+)/(#\d+)-"
-
     match = re.search(issue_pattern, branch_name)
-
     if not match:
         sys.exit(f"Issue number not found in branch name {branch_name}")
-
-    issue_number = match.group(2)
-
-    return issue_number
-
+    return match.group(2)
 
 def get_test_issue_names(issue_number):
-    """
-    깃허브 API를 사용하여 이슈에 등록된 테스트 케이스 이름을 가져옵니다.
-
-    이슈에 등록된 테스트 케이스 이름은 다음과 같은 형식이어야 합니다.
-    TEST: #{issue_number}-{testcase_name}
-    """
-
     url = f"https://api.github.com/repos/{repo}/issues?labels=test"
     headers = {
         "Authorization": f"token {github_token}",
         "Accept": "application/vnd.github.v3+json",
     }
     response = requests.get(url, headers=headers)
-
     if response.status_code != 200:
         sys.exit(f"Failed to fetch issues: {response.status_code}\nurl = {url}")
 
     test_issue_pattern = rf"TEST: {issue_number}-([\w\s]+)"
-
     print(f"Fetching test cases for issue: {issue_number}")
-
+    
     testcase_names = []
     for issue in response.json():
         match = re.match(test_issue_pattern, issue["title"])
         if match:
-            testcase_name = match.group(1)
-            testcase_names.append(testcase_name)
+            testcase_names.append(match.group(1))
     print(f"Test cases found: {testcase_names}")
     return testcase_names
-
 
 class PRTestRunner(DiscoverRunner):
     @classmethod
@@ -99,30 +75,30 @@ class PRTestRunner(DiscoverRunner):
         return suite
 
     def filter_suite(self, suite):
-        """
-        테스트 스위트에서 이슈에 등록된 테스트만 필터링합니다
-        """
         filtered_tests = []
         for test in suite:
             if isinstance(test, TestCase):
                 if test.__class__.__name__ in self.testcase_names:
                     filtered_tests.append(test)
             elif isinstance(test, TestSuite):
-                # 중첩된 TestSuite를 재귀적으로 처리
                 filtered_suite = self.filter_suite(test)
                 if filtered_suite.countTestCases() > 0:
                     filtered_tests.extend(filtered_suite)
 
         if not filtered_tests:
             print("No tests found for this issue")
-            return suite.__class__()  # 빈 테스트 스위트 반환
+            return suite.__class__()
 
         print(f"Running tests for: {', '.join(self.testcase_names)}")
-
         new_suite = suite.__class__()
         new_suite.addTests(filtered_tests)
         return new_suite
 
+    def run_tests(self, test_labels, extra_tests=None, **kwargs):
+        suite = self.build_suite(test_labels, extra_tests)
+        if self.testcase_names:
+            suite = self.filter_suite(suite)
+        return super().run_tests(test_labels, extra_tests, **kwargs)
 
 def main():
     if not settings.configured:
@@ -138,16 +114,9 @@ def main():
 
         print(f"Running tests for: {', '.join(testcase_names)}")
 
-        test_runner = PRTestRunner(testcase_names=testcase_names)
-        # call_command를 사용하여 테스트 실행
+        test_runner = PRTestRunner(testcase_names=testcase_names, verbosity=2, interactive=False)
         try:
-            call_command(
-                "test",
-                verbosity=2,
-                interactive=False,
-                testrunner=test_runner,
-                testcase_names=testcase_names,
-            )
+            call_command("test", testrunner=test_runner)
             print("Tests completed successfully")
         except SystemExit as e:
             print(f"An error occurred: {str(e)}")
@@ -156,7 +125,6 @@ def main():
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
