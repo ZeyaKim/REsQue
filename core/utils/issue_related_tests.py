@@ -23,7 +23,7 @@ def get_issue_number_from_branch():
     브런치 이름은 다음과 같은 형식이어야 합니다.
     {issue_type}/{issue_number}-{issue_title}
     """
-    issue_pattern = r"(\w+)/(\d+)-"
+    issue_pattern = r"(\w+)/(#\d+)-"
 
     match = re.search(issue_pattern, branch_name)
 
