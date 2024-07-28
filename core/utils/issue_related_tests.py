@@ -91,7 +91,7 @@ class PRTestRunner(DiscoverRunner):
         new_suite.addTests(filtered_tests)
         return new_suite
 
-    def run_tests(self, test_labels, extra_tests=None, **kwargs):
+    def run_tests(self, test_labels):
         self.setup_test_environment()
         suite = self.build_suite(test_labels)
         if self.testcase_names:
