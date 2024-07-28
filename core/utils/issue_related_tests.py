@@ -138,23 +138,20 @@ def main():
 
         print(f"Running tests for: {', '.join(testcase_names)}")
 
-        # Django 설정에서 TEST_RUNNER 설정을 임시로 변경
-        original_test_runner = settings.TEST_RUNNER
-        settings.TEST_RUNNER = "core.utils.issue_related_tests.PRTestRunner"
-
+        test_runner = PRTestRunner(testcase_names=testcase_names)
         # call_command를 사용하여 테스트 실행
         try:
             call_command(
                 "test",
                 verbosity=2,
                 interactive=False,
-                testrunner=settings.TEST_RUNNER,
+                testrunner=test_runner,
                 testcase_names=testcase_names,
             )
             print("Tests completed successfully")
-        finally:
-            # 원래의 TEST_RUNNER 설정 복구
-            settings.TEST_RUNNER = original_test_runner
+        except SystemExit as e:
+            print(f"An error occurred: {str(e)}")
+            sys.exit(1)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
