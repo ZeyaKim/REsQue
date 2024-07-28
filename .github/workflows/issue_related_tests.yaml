@@ -26,24 +26,40 @@ jobs:
       run: |
         pip install -r requirements.txt
 
-    - name: Set PYTHONPATH and check environment
+    - name: Set PYTHONPATH
       run: |
-        echo "Current working directory: $(pwd)"
-        ls -la
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
-        echo "PYTHONPATH: $PYTHONPATH"
-        which python
+        echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
+
+    - name: Check directory structure
+      run: |
+        pwd
+        ls -R
+
+    - name: Check __init__.py
+      run: |
+        cat REsQue/__init__.py
+
+    - name: Debug information
+      run: |
+        echo "Python version:"
         python --version
+        echo "Installed packages:"
+        pip list
+        echo "Content of core/utils directory:"
+        ls -la core/utils
+        echo "Content of REsQue directory:"
+        ls -la REsQue
 
     - name: Run API script
       run: |
+        export DJANGO_SETTINGS_MODULE=REsQue.settings
+        python -c "import sys; print(sys.path)"
         python core/utils/issue_related_tests.py
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO: ${{ github.repository }}
         OWNER: ${{ github.repository_owner }}
         BRANCH: ${{ github.head_ref }}
-        DJANGO_SETTINGS_MODULE: 'REsQue.settings'
         PYTHONUNBUFFERED: "1"
 
     - name: Check for script errors
@@ -51,4 +67,6 @@ jobs:
       run: |
         echo "The script failed to run. Please check the logs for more information."
         cat core/utils/issue_related_tests.py
+        echo "Current environment variables:"
+        env
         exit 1

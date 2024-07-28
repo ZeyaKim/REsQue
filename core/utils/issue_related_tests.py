@@ -17,6 +17,14 @@ github_token = os.getenv("GITHUB_TOKEN")
 if not all([owner, repo, branch_name, github_token]):
     sys.exit("Missing required environment variables")
 
+print(f"Current working directory: {os.getcwd()}")
+print(f"PYTHONPATH: {os.environ.get('PYTHONPATH')}")
+print(f"sys.path: {sys.path}")
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, project_root)
+print(f"Updated sys.path: {sys.path}")
+
 
 def get_issue_number_from_branch():
     """
