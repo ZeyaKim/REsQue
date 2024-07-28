@@ -28,7 +28,7 @@ def get_issue_number_from_branch():
     match = re.search(issue_pattern, branch_name)
 
     if not match:
-        sys.exit("Issue number not found in branch name")
+        sys.exit(f"Issue number not found in branch name {branch_name}")
 
     issue_number = match.group(2)
 
