@@ -93,7 +93,7 @@ class PRTestRunner(DiscoverRunner):
 
     def run_tests(self, test_labels, extra_tests=None, **kwargs):
         self.setup_test_environment()
-        suite = self.build_suite(test_labels, extra_tests)
+        suite = self.build_suite(test_labels)
         if self.testcase_names:
             suite = self.filter_suite(suite)
         result = self.run_suite(suite)
