@@ -67,6 +67,7 @@ def get_test_issue_names(issue_number):
 
     testcase_names = []
     for issue in response.json():
+        print(f"Checking issue: {issue['title']}\n")
         if re.search(test_issue_pattern, issue["title"]):
             testcase_name = re.search(test_issue_pattern, issue["title"]).group(1)
             testcase_names.append(testcase_name)
@@ -116,7 +117,6 @@ class PRTestRunner(DiscoverRunner):
 
 
 def main():
-    print("Running tests for issue related tests")
     if not settings.configured:
         django.setup()
 
