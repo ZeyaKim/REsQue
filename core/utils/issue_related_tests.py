@@ -63,12 +63,13 @@ def get_test_issue_names(issue_number):
     if response.status_code != 200:
         sys.exit(f"Failed to fetch issues: {response.status_code}\nurl = {url}")
 
-    test_issue_pattern = rf"TEST: #{issue_number}-(\w+)"
+    test_issue_pattern = rf"TEST: #{issue_number}-([\w\s]+)"
 
     testcase_names = []
     for issue in response.json():
-        if re.search(test_issue_pattern, issue["title"]):
-            testcase_name = re.search(test_issue_pattern, issue["title"]).group(1)
+        match = re.match(test_issue_pattern, issue["title"])
+        if match:
+            testcase_name = match.group(1)
             testcase_names.append(testcase_name)
     print(f"Test cases found: {testcase_names}")
     return testcase_names
