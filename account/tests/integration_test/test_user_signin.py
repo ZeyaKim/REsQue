@@ -10,7 +10,7 @@ class UserSignInTestCase(APITestCase):
         self.user_info = {"email": "testuser@email.com", "password": "TestPassword123!"}
 
         self.user = User.objects.create_user(**self.user_info)
-        self.url = reverse("sign-in")
+        self.url = reverse("user-signin")
 
     def test_success_login_with_valid_credentials(self):
         """
