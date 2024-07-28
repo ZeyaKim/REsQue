@@ -63,7 +63,7 @@ def get_test_issue_names(issue_number):
     if response.status_code != 200:
         sys.exit(f"Failed to fetch issues: {response.status_code}\nurl = {url}")
 
-    test_issue_pattern = rf"TEST: #{issue_number}-([\w\s]+)"
+    test_issue_pattern = rf"TEST: {issue_number}-([\w\s]+)"
 
     print(f"Fetching test cases for issue: {issue_number}")
 
