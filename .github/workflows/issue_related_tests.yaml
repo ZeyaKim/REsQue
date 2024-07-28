@@ -19,7 +19,7 @@ jobs:
     - name: Install pipenv and generate requirements.txt
       run: |
         pip install pipenv
-        pipenv lock -r > requirements.txt
+        pipenv requirements > requirements.txt
         cat requirements.txt
 
     - name: Install dependencies
