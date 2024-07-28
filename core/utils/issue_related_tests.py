@@ -25,12 +25,14 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 sys.path.insert(0, project_root)
 print(f"Updated sys.path: {sys.path}")
 
+
 def get_issue_number_from_branch():
     issue_pattern = r"(\w+)/(#\d+)-"
     match = re.search(issue_pattern, branch_name)
     if not match:
         sys.exit(f"Issue number not found in branch name {branch_name}")
     return match.group(2)
+
 
 def get_test_issue_names(issue_number):
     url = f"https://api.github.com/repos/{repo}/issues?labels=test"
@@ -44,7 +46,7 @@ def get_test_issue_names(issue_number):
 
     test_issue_pattern = rf"TEST: {issue_number}-([\w\s]+)"
     print(f"Fetching test cases for issue: {issue_number}")
-    
+
     testcase_names = []
     for issue in response.json():
         match = re.match(test_issue_pattern, issue["title"])
@@ -53,23 +55,14 @@ def get_test_issue_names(issue_number):
     print(f"Test cases found: {testcase_names}")
     return testcase_names
 
-class PRTestRunner(DiscoverRunner):
-    @classmethod
-    def add_arguments(cls, parser):
-        super().add_arguments(parser)
-        parser.add_argument(
-            "--testcase_names",
-            nargs="+",
-            type=str,
-            help="Specify testcase names to run",
-        )
 
+class PRTestRunner(DiscoverRunner):
     def __init__(self, testcase_names=None, **kwargs):
         self.testcase_names = testcase_names or []
         super().__init__(**kwargs)
 
-    def build_suite(self, *args, **kwargs):
-        suite = super().build_suite(*args, **kwargs)
+    def build_suite(self, test_labels=None, extra_tests=None, **kwargs):
+        suite = super().build_suite(test_labels, extra_tests, **kwargs)
         if self.testcase_names:
             return self.filter_suite(suite)
         return suite
@@ -95,10 +88,18 @@ class PRTestRunner(DiscoverRunner):
         return new_suite
 
     def run_tests(self, test_labels, extra_tests=None, **kwargs):
+        self.setup_test_environment()
         suite = self.build_suite(test_labels, extra_tests)
         if self.testcase_names:
             suite = self.filter_suite(suite)
-        return super().run_tests(test_labels, extra_tests, **kwargs)
+        result = self.run_suite(suite)
+        self.teardown_test_environment()
+        return self.suite_result(suite, result)
+
+    def split_suite(self, suite):
+        # Django 3.2 이상에서 필요한 메서드
+        return self.reorder_suite(suite)
+
 
 def main():
     if not settings.configured:
@@ -114,17 +115,23 @@ def main():
 
         print(f"Running tests for: {', '.join(testcase_names)}")
 
-        test_runner = PRTestRunner(testcase_names=testcase_names, verbosity=2, interactive=False)
-        try:
-            call_command("test", testrunner=test_runner)
-            print("Tests completed successfully")
-        except SystemExit as e:
-            print(f"An error occurred: {str(e)}")
+        test_runner = PRTestRunner(
+            testcase_names=testcase_names, verbosity=2, interactive=False
+        )
+        failures = (
+            test_runner.run_tests()
+        )  # 여기서 "account"는 테스트를 실행할 앱 이름입니다. 필요에 따라 변경하세요.
+
+        if failures:
+            print(f"Some tests failed. Number of failures: {failures}")
             sys.exit(1)
+        else:
+            print("All tests passed successfully.")
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
