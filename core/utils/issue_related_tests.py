@@ -92,8 +92,8 @@ class PRTestRunner(DiscoverRunner):
         self.testcase_names = testcase_names or []
         super().__init__(**kwargs)
 
-    def build_suite(self, test_labels=None, extra_tests=None, **kwargs):
-        suite = super().build_suite(test_labels, extra_tests, **kwargs)
+    def build_suite(self, *args, **kwargs):
+        suite = super().build_suite(*args, **kwargs)
         if self.testcase_names:
             return self.filter_suite(suite)
         return suite
