@@ -1,0 +1,27 @@
+name: Issue Related Tests
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  issue-related-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies and run API script
+      run: |
+        pipenv install --dev
+        pipenv run python core/utils/issue_related_tests.py
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPO: ${{ github.repository }}
+        OWNER: ${{ github.repository_owner }}
+        BRANCH: ${{ github.head_ref }}
