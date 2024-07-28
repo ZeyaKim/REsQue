@@ -65,6 +65,8 @@ def get_test_issue_names(issue_number):
 
     test_issue_pattern = rf"TEST: #{issue_number}-([\w\s]+)"
 
+    print(f"Fetching test cases for issue: {issue_number}")
+
     testcase_names = []
     for issue in response.json():
         match = re.match(test_issue_pattern, issue["title"])
