@@ -6,6 +6,8 @@ from django.test.runner import DiscoverRunner
 from django.test import TestCase
 import django
 from django.conf import settings
+from django.core.management import call_command
+
 
 owner = os.getenv("OWNER")
 repo = os.getenv("REPO")
@@ -65,20 +67,25 @@ def get_test_issue_names(issue_number):
 
 
 class PRTestRunner(DiscoverRunner):
-    """
-    PR에 관련된 테스트만 실행하는 테스트 러너입니다.
+    @classmethod
+    def add_arguments(cls, parser):
+        super().add_arguments(parser)
+        parser.add_argument(
+            "--testcase_names",
+            nargs="+",
+            type=str,
+            help="Specify testcase names to run",
+        )
 
-    이슈에 등록된 테스트 케이스 이름과 일치하는 테스트만 실행합니다.
-    """
-
-    def __init__(self, testcase_names, *args, **kwargs):
-        self.testcase_names = testcase_names
-        super().__init__(*args, **kwargs)
+    def __init__(self, testcase_names=None, **kwargs):
+        self.testcase_names = testcase_names or []
+        super().__init__(**kwargs)
 
     def build_suite(self, test_labels=None, extra_tests=None, **kwargs):
         suite = super().build_suite(test_labels, extra_tests, **kwargs)
-        filtered_suite = self.filter_suite(suite)
-        return filtered_suite
+        if self.testcase_names:
+            return self.filter_suite(suite)
+        return suite
 
     def filter_suite(self, suite):
         """
@@ -113,15 +120,24 @@ def main():
             return
 
         print(f"Running tests for: {', '.join(testcase_names)}")
-        runner = PRTestRunner(testcase_names)
 
-        failures = runner.run_tests()
-        sys.exit(bool(failures))
+        # Django 설정에서 TEST_RUNNER 설정을 임시로 변경
+        original_test_runner = settings.TEST_RUNNER
+        settings.TEST_RUNNER = "path.to.your.PRTestRunner"
+
+        # call_command를 사용하여 테스트 실행
+        try:
+            call_command(
+                "test",
+                verbosity=2,
+                interactive=False,
+                testrunner="path.to.your.PRTestRunner",
+                testcase_names=testcase_names,
+            )
+        finally:
+            # 원래의 TEST_RUNNER 설정 복구
+            settings.TEST_RUNNER = original_test_runner
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
         sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
