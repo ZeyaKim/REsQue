@@ -30,25 +30,13 @@ jobs:
       run: |
         echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
 
-    - name: Check directory structure
+    - name: Make migrations
       run: |
-        pwd
-        ls -R
+        python manage.py makemigrations
 
-    - name: Check __init__.py
+    - name: Run migrations
       run: |
-        cat REsQue/__init__.py
-
-    - name: Debug information
-      run: |
-        echo "Python version:"
-        python --version
-        echo "Installed packages:"
-        pip list
-        echo "Content of core/utils directory:"
-        ls -la core/utils
-        echo "Content of REsQue directory:"
-        ls -la REsQue
+        python manage.py migrate
 
     - name: Run API script
       run: |
