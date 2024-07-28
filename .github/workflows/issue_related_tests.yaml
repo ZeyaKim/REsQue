@@ -18,6 +18,7 @@ jobs:
 
     - name: Install dependencies and run API script
       run: |
+        pip install pipenv
         pipenv install --dev
         pipenv run python core/utils/issue_related_tests.py
       env:
