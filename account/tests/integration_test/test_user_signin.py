@@ -10,6 +10,7 @@ class UserSignInTestCase(APITestCase):
         self.user_info = {"email": "testuser@email.com", "password": "TestPassword123!"}
 
         self.user = User.objects.create_user(**self.user_info)
+
         self.url = reverse("user-signin")
 
     def test_success_login_with_valid_credentials(self):
@@ -22,8 +23,8 @@ class UserSignInTestCase(APITestCase):
 
         # Then
         self.assertEqual(response.status_code, 200)
-        self.assertIn("access_token", response.data)
-        self.assertIn("refresh_token", response.data)
+        self.assertIn("access", response.data)
+        self.assertIn("refresh", response.data)
 
     def test_fail_login_with_invalid_password(self):
         # Given
