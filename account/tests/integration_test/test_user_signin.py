@@ -75,11 +75,14 @@ class UserSignInEdgeCaseTestCase(APITestCase):
 
     def test_fail_login_with_inactive_user(self):
         # Given
-        self.user.is_active = False
-        self.user.save()
+        new_user_info = {
+            "email": "newuser@example.com",
+            "password": "TestPassword123!",
+        }
+        new_user = User.objects.create_user(**new_user_info, is_active=False)
 
         # When
-        response = self.client.post(self.url, self.user_info)
+        response = self.client.post(self.url, new_user_info)
 
         # Then
         self.assertEqual(response.status_code, 401)
