@@ -9,6 +9,7 @@ djangorestframework = "*"
 coverage = "*"
 python-dotenv = "*"
 requests = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 isort = "*"
