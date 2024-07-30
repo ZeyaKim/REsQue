@@ -7,11 +7,13 @@ name = "pip_conf_index_global"
 django = "*"
 djangorestframework = "*"
 coverage = "*"
+python-dotenv = "*"
+requests = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 isort = "*"
 faker = "*"
-requests = "*"
 
 [requires]
 python_version = "3.12"
