@@ -44,6 +44,7 @@ jobs:
         python -c "import sys; print(sys.path)"
         python core/utils/issue_related_tests.py
       env:
+        DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO: ${{ github.repository }}
         OWNER: ${{ github.repository_owner }}
