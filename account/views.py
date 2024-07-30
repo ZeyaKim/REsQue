@@ -18,7 +18,6 @@ class SignInView(APIView):
     def post(self, request):
 
         serializer = UserSignInSerializer(data=request.data)
-        print(f"request.data: {request.data}\nis_valid: {serializer.is_valid()}")
 
         if serializer.is_valid():
             email = serializer.validated_data["email"].strip()
