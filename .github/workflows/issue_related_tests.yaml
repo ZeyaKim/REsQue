@@ -30,6 +30,12 @@ jobs:
       run: |
         echo "PYTHONPATH=$PYTHONPATH:$(pwd)" >> $GITHUB_ENV
 
+    - name: Set up environment variables
+      run: |
+        echo "DJANGO_SECRET_KEY=$DJANGO_SECRET_KEY" >> $GITHUB_ENV
+      env:
+        DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+
     - name: Make migrations
       run: |
         python manage.py makemigrations
@@ -37,8 +43,6 @@ jobs:
     - name: Run migrations
       run: |
         python manage.py migrate
-      env:
-        DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
 
     - name: Run API script
       run: |
