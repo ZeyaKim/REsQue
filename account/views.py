@@ -5,6 +5,9 @@ from account.serializers import UserSignUpSerializer, UserSignInSerializer
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+from account.models import CustomUser
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -48,3 +51,17 @@ class SignInView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeactivationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user: CustomUser = request.user
+
+        user.is_active = False
+        user.deactivated_at = timezone.now()
+        user.deactivation_reason = request.data.get("reason", "")
+
+        user.save()
+        return Response(status=status.HTTP_200_OK)
