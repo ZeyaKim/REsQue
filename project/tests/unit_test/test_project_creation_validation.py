@@ -33,7 +33,7 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
         # Then
         self.assertFalse(project_serializer.is_valid())
         self.assertEqual(
-            project_serializer.errors["title"][0], "This field may not be blank."
+            project_serializer.errors["title"][0], "이 필드는 blank일 수 없습니다."
         )
 
     def test_project_creation_with_too_long_title(self):
@@ -63,7 +63,7 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
         self.assertFalse(project_serializer.is_valid())
         self.assertEqual(
             project_serializer.errors["description"][0],
-            "Ensure this field has no more than 1000 characters.",
+            "이 필드의 글자 수가 1000 이하인지 확인하십시오.",
         )
 
     def test_project_creation_with_missing_title(self):
@@ -77,7 +77,7 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
         # Then
         self.assertFalse(project_serializer.is_valid())
         self.assertEqual(
-            project_serializer.errors["title"][0], "This field is required."
+            project_serializer.errors["title"][0], "이 필드는 필수 항목입니다."
         )
 
     def test_project_creation_with_missing_description(self):
@@ -91,7 +91,7 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
         # Then
         self.assertFalse(project_serializer.is_valid())
         self.assertEqual(
-            project_serializer.errors["description"][0], "This field is required."
+            project_serializer.errors["description"][0], "이 필드는 필수 항목입니다."
         )
 
     def test_project_creation_with_non_string_title(self):
@@ -105,7 +105,7 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
         # Then
         self.assertFalse(project_serializer.is_valid())
         self.assertEqual(
-            project_serializer.errors["title"][0], "Must be a valid string."
+            project_serializer.errors["title"][0], "이 필드는 문자열이어야 합니다."
         )
 
     def test_project_creation_with_non_string_description(self):
@@ -118,6 +118,8 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
 
         # Then
         self.assertFalse(project_serializer.is_valid())
+
         self.assertEqual(
-            project_serializer.errors["description"][0], "Must be a valid string."
+            project_serializer.errors["description"][0],
+            "이 필드는 문자열이어야 합니다.",
         )
