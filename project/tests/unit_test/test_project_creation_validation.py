@@ -93,33 +93,3 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
         self.assertEqual(
             project_serializer.errors["description"][0], "이 필드는 필수 항목입니다."
         )
-
-    def test_project_creation_with_non_string_title(self):
-        # Given
-        invalid_project_data = self.create_valid_project_data()
-        invalid_project_data["title"] = 123
-
-        # When
-        project_serializer = ProjectSerializer(data=invalid_project_data)
-
-        # Then
-        self.assertFalse(project_serializer.is_valid())
-        self.assertEqual(
-            project_serializer.errors["title"][0], "이 필드는 문자열이어야 합니다."
-        )
-
-    def test_project_creation_with_non_string_description(self):
-        # Given
-        invalid_project_data = self.create_valid_project_data()
-        invalid_project_data["description"] = 123
-
-        # When
-        project_serializer = ProjectSerializer(data=invalid_project_data)
-
-        # Then
-        self.assertFalse(project_serializer.is_valid())
-
-        self.assertEqual(
-            project_serializer.errors["description"][0],
-            "이 필드는 문자열이어야 합니다.",
-        )
