@@ -1,7 +1,7 @@
-from rest_framework.test import APITestCase
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.reverse import reverse
-from django.contrib.auth import get_user_model
+from rest_framework.test import APITestCase
 
 User = get_user_model()
 
@@ -66,5 +66,3 @@ class UserSignupTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("이 필드는 필수 항목입니다.", str(response.data))
         self.assertEqual(User.objects.count(), 0)
-
-        

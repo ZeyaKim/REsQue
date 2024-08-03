@@ -1,7 +1,8 @@
-from faker import Faker
 import abc
+from typing import Any, Type
+
 from django.db.models import Model
-from typing import Type, Any
+from faker import Faker
 
 fake = Faker()
 

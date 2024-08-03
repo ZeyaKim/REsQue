@@ -15,9 +15,10 @@ class MarkdownParser:
 
     @staticmethod
     def _parse_section(section_content: str, level: int = 1):
-        main_content, sub_sections_string = (
-            MarkdownParser._divide_markdown_before_next_section(section_content, level)
-        )
+        (
+            main_content,
+            sub_sections_string,
+        ) = MarkdownParser._divide_markdown_before_next_section(section_content, level)
 
         main_section = None
         if main_content:
@@ -80,9 +81,7 @@ class MarkdownParser:
 
         match = main_content_pattern.match(main_content.strip())
         if not match:
-            raise MarkdownParseError(
-                f"주 섹션의 구조가 올바르지 않습니다. (레벨: {level})"
-            )
+            raise MarkdownParseError(f"주 섹션의 구조가 올바르지 않습니다. (레벨: {level})")
 
         title = match.group("title").strip()
         comment = match.group("comment")

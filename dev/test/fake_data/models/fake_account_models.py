@@ -1,6 +1,7 @@
 from faker import Faker
-from dev.test.fake_data.models.fake_model import FakeModel
+
 from account.models import CustomUser
+from dev.test.fake_data.models.fake_model import FakeModel
 
 
 class FakeCustomUser(FakeModel):

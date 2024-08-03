@@ -1,2 +1,3 @@
-from django.core.exceptions import ValidationError
 import abc
+
+from django.core.exceptions import ValidationError

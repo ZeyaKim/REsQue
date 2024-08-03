@@ -1,8 +1,9 @@
 from django.test import SimpleTestCase
+
 from core.utils.markdown_parser import (
     MarkdownParser,
-    SingleHeadingMarkdown,
     MultiHeadingMarkdown,
+    SingleHeadingMarkdown,
 )
 
 single_heading_markdown = """
@@ -129,41 +130,42 @@ subsub_content_2
 
 
 class MarkdownParserTestCase(SimpleTestCase):
-
     def test_divide_markdown_before_next_section_with_simple_single_heading(self):
-
-        main_content, sub_sections = (
-            MarkdownParser._divide_markdown_before_next_section(
-                simple_single_heading_markdown
-            )
+        (
+            main_content,
+            sub_sections,
+        ) = MarkdownParser._divide_markdown_before_next_section(
+            simple_single_heading_markdown
         )
 
         self.assertTrue(main_content.startswith("# Title_h1"))
         self.assertTrue(sub_sections.startswith("## Subtitle_h2"))
 
     def test_divide_markdown_before_next_section_with_single_heading(self):
-
-        main_content, sub_sections = (
-            MarkdownParser._divide_markdown_before_next_section(single_heading_markdown)
-        )
+        (
+            main_content,
+            sub_sections,
+        ) = MarkdownParser._divide_markdown_before_next_section(single_heading_markdown)
 
         self.assertTrue(main_content.startswith("# Title_h1"))
         self.assertTrue(sub_sections.startswith("## Subtitle_h2"))
 
     def test_divide_markdown_before_next_section_with_simple_multi_heading(self):
-        main_content, sub_sections = (
-            MarkdownParser._divide_markdown_before_next_section(
-                simple_multi_heading_markdown
-            )
+        (
+            main_content,
+            sub_sections,
+        ) = MarkdownParser._divide_markdown_before_next_section(
+            simple_multi_heading_markdown
         )
 
         self.assertEqual(main_content, "")
         self.assertTrue(sub_sections.startswith("## Subtitle_h2"))
 
     def test_divide_markdown_before_next_section_with_multi_heading(self):
-        main_content, sub_sections = (
-            MarkdownParser._divide_markdown_before_next_section(multi_heading_markdown)
-        )
+        (
+            main_content,
+            sub_sections,
+        ) = MarkdownParser._divide_markdown_before_next_section(multi_heading_markdown)
 
         self.assertEqual(main_content, "")
         self.assertTrue(sub_sections.startswith("## Subtitle_h2"))
@@ -187,7 +189,6 @@ class MarkdownParserTestCase(SimpleTestCase):
         self.assertEqual(main_section["body"], "sub_content")
 
     def test_split_sub_content(self):
-
         sub_sections = MarkdownParser._split_sub_content(simple_sub_sections, level=2)
 
         self.assertEqual(len(sub_sections), 4)

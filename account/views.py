@@ -1,13 +1,13 @@
-from rest_framework import generics, status
-from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from account.serializers import UserSignUpSerializer, UserSignInSerializer
-from rest_framework.views import APIView
-from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
-from account.models import CustomUser
+from django.contrib.auth import authenticate, get_user_model
 from django.utils import timezone
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from account.models import CustomUser
+from account.serializers import UserSignInSerializer, UserSignUpSerializer
 
 User = get_user_model()
 
@@ -19,7 +19,6 @@ class SignUpView(generics.CreateAPIView):
 
 class SignInView(APIView):
     def post(self, request):
-
         serializer = UserSignInSerializer(data=request.data)
 
         if serializer.is_valid():

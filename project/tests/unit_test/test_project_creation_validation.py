@@ -1,4 +1,5 @@
 from django.test import SimpleTestCase
+
 from project.serializers import ProjectSerializer
 
 
@@ -32,9 +33,7 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
 
         # Then
         self.assertFalse(project_serializer.is_valid())
-        self.assertEqual(
-            project_serializer.errors["title"][0], "이 필드는 blank일 수 없습니다."
-        )
+        self.assertEqual(project_serializer.errors["title"][0], "이 필드는 blank일 수 없습니다.")
 
     def test_project_creation_with_too_long_title(self):
         # Given
@@ -76,9 +75,7 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
 
         # Then
         self.assertFalse(project_serializer.is_valid())
-        self.assertEqual(
-            project_serializer.errors["title"][0], "이 필드는 필수 항목입니다."
-        )
+        self.assertEqual(project_serializer.errors["title"][0], "이 필드는 필수 항목입니다.")
 
     def test_project_creation_with_missing_description(self):
         # Given
@@ -90,6 +87,4 @@ class ProjectCreationValidationTestCase(SimpleTestCase):
 
         # Then
         self.assertFalse(project_serializer.is_valid())
-        self.assertEqual(
-            project_serializer.errors["description"][0], "이 필드는 필수 항목입니다."
-        )
+        self.assertEqual(project_serializer.errors["description"][0], "이 필드는 필수 항목입니다.")

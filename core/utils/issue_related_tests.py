@@ -1,13 +1,14 @@
 import os
-import sys
 import re
-import requests
-from django.test.runner import DiscoverRunner
-from django.test import TestCase
+import sys
+from unittest import TestSuite
+
 import django
+import requests
 from django.conf import settings
 from django.core.management import call_command
-from unittest import TestSuite
+from django.test import TestCase
+from django.test.runner import DiscoverRunner
 
 owner = os.getenv("OWNER")
 repo = os.getenv("REPO")

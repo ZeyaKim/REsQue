@@ -1,6 +1,7 @@
-from rest_framework import serializers
-from project.models import Project
 from django.db import IntegrityError
+from rest_framework import serializers
+
+from project.models import Project
 
 
 class ProjectSerializer(serializers.ModelSerializer):
