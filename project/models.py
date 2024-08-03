@@ -11,5 +11,8 @@ class Project(models.Model):
         "account.CustomUser", on_delete=models.SET_NULL, null=True
     )
 
+    class Meta:
+        unique_together = ["title", "founder"]
+
     def __str__(self):
         return self.title

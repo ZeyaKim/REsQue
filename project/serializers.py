@@ -1,26 +1,25 @@
 from rest_framework import serializers
 from project.models import Project
+from django.db import IntegrityError
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(max_length=100)
+    description = serializers.CharField(max_length=1000, allow_blank=True)
+
     class Meta:
         model = Project
         fields = "__all__"
+        read_only_fields = ["founder", "created_at", "updated_at", "is_active"]
 
-    def to_internal_value(self, data):
-        errors = {}
-        if "title" in data:
-            if not isinstance(data["title"], str):
-                errors["title"] = ["이 필드는 문자열이어야 합니다."]
-            else:
-                data["title"] = data["title"].strip()
-        if "description" in data:
-            if not isinstance(data["description"], str):
-                errors["description"] = ["이 필드는 문자열이어야 합니다."]
-            else:
-                data["description"] = data["description"].strip()
-
-        if errors:
-            raise serializers.ValidationError(errors)
-
-        return super().to_internal_value(data)
+    def create(self, validated_data):
+        try:
+            return super().create(validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError(
+                {
+                    "non_field_errors": [
+                        "A project with this title already exists for this founder."
+                    ]
+                }
+            )
