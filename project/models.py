@@ -16,3 +16,11 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class ProjectInvitation(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    inviter = models.ForeignKey(
+        "account.CustomUser", on_delete=models.CASCADE, related_name="inviter"
+    )
+    invitee_email = models.EmailField()
